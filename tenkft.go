@@ -41,6 +41,9 @@ const (
 	Staging = "https://vnext.10000ft.com/api/v1"
 )
 
+// DefaultClient initializes as nil, you msut call SetDefaultClient first.
+var DefaultClient *Client
+
 // Client use NewClient to return this instance type.
 type Client struct {
 	token      string
@@ -57,6 +60,17 @@ func NewClient(token, env string) (*Client, error) {
 	c := &Client{token: token, env: env}
 
 	return c, nil
+}
+
+// SetDefaultClient changes the package level DefaultClient for easier access.
+func SetDefaultClient(token, env string) error {
+	if env != Production && env != Staging {
+		return fmt.Errorf("env must be either %v, or %v", Production, Staging)
+	}
+
+	DefaultClient = &Client{token: token, env: env}
+
+	return nil
 }
 
 func queryfy(opts map[string]string) string {
