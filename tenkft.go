@@ -827,3 +827,55 @@ func (c *Client) GetProjectUsers(pID int, opts map[string]string) (users *Users,
 
 	return
 }
+
+func (c *Client) GetAllTimeEntries(opts map[string]string) (timeEntries *TimeEntries, resp *http.Response, err error) {
+	opts["per_page"] = "500"
+	timeEntries, resp, err = c.GetTimeEntries(opts)
+	if err != nil {
+		return
+	}
+
+	for loop := timeEntries.Paging.HasNext(); loop == true; loop = timeEntries.Paging.HasNext() {
+		opts["page"] = strconv.Itoa(timeEntries.Paging.GetNextPage())
+		newTimeEntries, newResp, newErr := c.GetTimeEntries(opts)
+		resp = newResp
+		if err != nil {
+			err = newErr
+			break
+		}
+
+		timeEntries.Paging = newTimeEntries.Paging
+		timeEntries.Data = append(timeEntries.Data, newTimeEntries.Data...)
+	}
+
+	return
+}
+
+// GetTimeEntries returns a project's users /projects/<id>/users
+func (c *Client) GetTimeEntries(opts map[string]string) (timeEntries *TimeEntries, resp *http.Response, err error) {
+	timeEntries = &TimeEntries{}
+	opts["per_page"] = "500"
+	query := queryfy(opts)
+	url := c.env + "/time_entries?" + query
+	method, headers := http.MethodGet, map[string]string{"auth": c.token}
+
+	fetcher, err := utils.NewFetchOpts(url, method, "", headers, c.MaxRetries)
+	if err != nil {
+		return
+	}
+
+	resp, err = fetcher.Fetch()
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal(bytes, timeEntries)
+
+	return
+}

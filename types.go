@@ -324,3 +324,27 @@ type BillRate struct {
 	Startdate    string  `json:"startdate"`
 	Enddate      string  `json:"enddate"`
 }
+
+// TimeEntries abastraction to a role object
+type TimeEntries struct {
+	Data   []*TimeEntry `json:"data"`
+	Paging *Paging      `json:"paging"`
+}
+
+// TimeEntry abstraction to a role object
+type TimeEntry struct {
+	ID             int     `json:"id"`
+	UserID         int     `json:"user_id"`
+	AssignableID   int     `json:"assignable_id"`
+	AssignableType string  `json:"assignable_type"`
+	Date           string  `json:"date"`
+	Hours          float64 `json:"hours"`
+	IsSuggestion   bool    `json:"is_suggestion"`
+	ScheduledHours int     `json:"scheduled_hours"`
+	Task           string  `json:"task"`
+	Notes          string  `json:"notes"`
+	BillRate       float64 `json:"bill_rate"`
+	BillRateID     int     `json:"bill_rate_id"`
+	CreatedAt      string  `json:"created_at"`
+	UpdatedAt      string  `json:"updated_at"`
+}
